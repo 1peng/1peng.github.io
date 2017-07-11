@@ -371,6 +371,135 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://mrlonlyman.github.io/2017/04/02/PHP中利用redis实现消息队列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="YiPeng Wang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yipeng's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/04/02/PHP中利用redis实现消息队列/" itemprop="url">PHP中利用redis实现消息队列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-02T13:45:26+08:00">
+                2017-04-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/02/PHP中利用redis实现消息队列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/02/PHP中利用redis实现消息队列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在电商活动中，常常会出现高并发的情况，例如很多人同时点击购买按钮，以至于购买人数超出了库存量，这是一种非常不理想的状况，因此，我们在PHP开发中就会引入消息队列来解决这种高并发的问题。</p>
+<h1 id="将请求存入redis"><a href="#将请求存入redis" class="headerlink" title="将请求存入redis"></a>将请求存入redis</h1><p>当用户点击抢购按钮时，我们通过ajax将请求发给php进行处理，前台返回给用户正在处理的提示（当然，这种提示让设计师设计出让用户满意的效果）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$redis</span> = new Redis();</div><div class="line"><span class="variable">$redis</span>-&gt;connect(<span class="string">'127.0.0.1'</span>,6379);</div><div class="line">try&#123;</div><div class="line">    <span class="variable">$redis</span>-&gt;LPUSH(<span class="string">'click'</span>,<span class="variable">$user_id</span>);</div><div class="line">&#125;catch(Exception <span class="variable">$e</span>)&#123;</div><div class="line">    <span class="built_in">echo</span> <span class="variable">$e</span>-&gt;getMessage();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="在后台进行数据处理"><a href="#在后台进行数据处理" class="headerlink" title="在后台进行数据处理"></a>在后台进行数据处理</h1><h3 id="守护进程"><a href="#守护进程" class="headerlink" title="守护进程"></a>守护进程</h3><p>当上述请求存入redis后，就可以直接将结果返回给用户了。我们需要在服务端创建一个后台运行的程序，从redis中取出请求数据，并利用这些数据读取和更新数据库。但是这一切都是后台运行解决的，而非用户请求触发的。</p>
+<h3 id="从redis中将请求取出"><a href="#从redis中将请求取出" class="headerlink" title="从redis中将请求取出"></a>从redis中将请求取出</h3><p>通过上面的代码，redis中会存储很多请求，这些请求都是准备用来处理的。这个列队已经存在了之后，再服务器后台，则对这些请求进行处理，第一步就是先从redis中逐一取出请求。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$redis</span> = new Redis();Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/<span class="built_in">help</span>/us/ysearch/slurp)</div><div class="line"><span class="variable">$redis</span>-&gt;pconnect(<span class="string">'127.0.0.1'</span>,6379);</div><div class="line"><span class="keyword">while</span>(True)&#123;</div><div class="line">    try&#123;</div><div class="line">        <span class="variable">$value</span> = <span class="variable">$redis</span>-&gt;LPOP(<span class="string">'click'</span>);</div><div class="line">        /*</div><div class="line">         *  利用<span class="variable">$value</span>进行逻辑和数据处理</div><div class="line">         */</div><div class="line">    &#125;catch(Exception <span class="variable">$e</span>)&#123;</div><div class="line">        <span class="built_in">echo</span> <span class="variable">$e</span>-&gt;getMessage();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="数据处理：长连接与事件"><a href="#数据处理：长连接与事件" class="headerlink" title="数据处理：长连接与事件"></a>数据处理：长连接与事件</h3><p>为了保证数据处理正常进行，必须和数据库之间建立长连接，因此上面我们采用了pconnect。在于mysql连接时，也要采用长连接，保证数据处理的有效性。同时，由于在后台运行，我们不可能随时获取数据库操作的状态，因此，我们最好采用innodb引擎，对数据库操作事件进行监听，如果出现了异常，要对事件结果进行检查，如果数据插入失败，应该重新执行该事件。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
@@ -416,7 +545,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">Artikel</span>
               </a>
             </div>
@@ -429,7 +558,7 @@
             
             <div class="site-state-item site-state-tags">
               
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">Tags</span>
               
             </div>
