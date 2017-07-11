@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Accueil
+            Startseite
           </a>
         </li>
       
@@ -208,7 +208,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -280,7 +280,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posté le</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-31T13:45:26+08:00">
                 2017-05-31
@@ -409,7 +409,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posté le</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-02T13:45:26+08:00">
                 2017-04-02
@@ -466,7 +466,7 @@
 <h3 id="从redis中将请求取出"><a href="#从redis中将请求取出" class="headerlink" title="从redis中将请求取出"></a>从redis中将请求取出</h3><p>通过上面的代码，redis中会存储很多请求，这些请求都是准备用来处理的。这个列队已经存在了之后，再服务器后台，则对这些请求进行处理，第一步就是先从redis中逐一取出请求。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$redis</span> = new Redis();</div><div class="line"><span class="variable">$redis</span>-&gt;pconnect(<span class="string">'127.0.0.1'</span>,6379);</div><div class="line"><span class="keyword">while</span>(True)&#123;</div><div class="line">    try&#123;</div><div class="line">        <span class="variable">$value</span> = <span class="variable">$redis</span>-&gt;LPOP(<span class="string">'click'</span>);</div><div class="line">        /*</div><div class="line">         *  利用<span class="variable">$value</span>进行逻辑和数据处理</div><div class="line">         */</div><div class="line">    &#125;catch(Exception <span class="variable">$e</span>)&#123;</div><div class="line">        <span class="built_in">echo</span> <span class="variable">$e</span>-&gt;getMessage();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h3 id="数据处理：长连接与事件"><a href="#数据处理：长连接与事件" class="headerlink" title="数据处理：长连接与事件"></a>数据处理：长连接与事件</h3><p>为了保证数据处理正常进行，必须和数据库之间建立长连接，因此上面我们采用了pconnect。在于mysql连接时，也要采用长连接，保证数据处理的有效性。同时，由于在后台运行，我们不可能随时获取数据库操作的状态，因此，我们最好采用innodb引擎，对数据库操作事件进行监听，如果出现了异常，要对事件结果进行检查，如果数据插入失败，应该重新执行该事件。</p>
-<p>本文转自：<a href="http://www.tangshuang.net/blog" target="_blank" rel="external">http://www.tangshuang.net/blog</a></p>
+<p>本文转自：<a href="http://www.tangshuang.net/100.html" target="_blank" rel="external">http://www.tangshuang.net/100.html</a></p>
 
           
         
@@ -547,7 +547,7 @@
             <div class="site-state-item site-state-posts">
               <a href="/archives">
                 <span class="site-state-item-count">2</span>
-                <span class="site-state-item-name">articles</span>
+                <span class="site-state-item-name">Artikel</span>
               </a>
             </div>
           
@@ -560,7 +560,7 @@
             <div class="site-state-item site-state-tags">
               
                 <span class="site-state-item-count">2</span>
-                <span class="site-state-item-name">tags</span>
+                <span class="site-state-item-name">Tags</span>
               
             </div>
           
@@ -610,11 +610,11 @@
 
 
 <div class="powered-by">
-  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+  Erstellt mit  <a class="theme-link" href="https://hexo.io">Hexo</a>
 </div>
 
 <div class="theme-info">
-  Thème -
+  Theme -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
     NexT.Muse
   </a>
